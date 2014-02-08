@@ -1,0 +1,27 @@
+{
+  "name": "kist-dochopper",
+  "version": "0.0.0",
+  "homepage": "https://github.com/niksy/kist-dochopper",
+  "description": "Move elements on page depending on media query.",
+  "main": "dist/kist-dochopper.min.js",
+  "keywords": [
+    "mq",
+    "jump"
+  ],
+  "authors": [
+    "Ivan Nikolić"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": ">=1.9",
+    "media-match": "niksy/media-match#~2.0.3",
+    "matchmedia": "~0.1.0"
+  }
+}
