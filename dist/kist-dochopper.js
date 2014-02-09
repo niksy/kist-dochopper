@@ -1,4 +1,4 @@
-/* kist-dochopper 0.0.0 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
+/* kist-dochopper 0.1.0 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
 ;(function ( $, window, document, undefined ) {
 
 	var o                    = {};
