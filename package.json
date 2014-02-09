@@ -1,6 +1,6 @@
 {
   "name": "kist-dochopper",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Move elements on page depending on media query.",
   "main": "src/kist-dochopper.js",
   "repository": {
