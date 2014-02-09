@@ -33,6 +33,8 @@
 		this.getFlowConditions();
 		this.setFlowListeners();
 
+		return this;
+
 	};
 
 	/**
