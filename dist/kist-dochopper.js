@@ -1,4 +1,4 @@
-/* kist-dochopper 0.1.1 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
+/* kist-dochopper 0.1.2 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
 ;(function ( $, window, document, undefined ) {
 
 	var o                    = {};
@@ -6,7 +6,7 @@
 	var pluginDomNamespace   = 'kist-dochopper';
 	var pluginEventNamespace = 'kist.dochopper';
 
-	var Plugin = function ( element, options ) {
+	var PluginModule = function ( element, options ) {
 
 		this._element  = element;
 		this.settings  = $.extend( {}, this.defaults, options );
@@ -172,20 +172,20 @@
 		 * Callback after everything is finished.
 		 */
 		this.settings.onContextSwitch();
-		this.domRefs.element.trigger( pluginEventNamespace + '.contextSwitch' );
+		this.domRefs.element.trigger( 'contextSwitch.' + pluginEventNamespace );
 
 	};
 
-	$.extend( Plugin.prototype, o );
+	$.extend( PluginModule.prototype, o );
 
 	$[ pluginName ]          = {};
-	$[ pluginName ].defaults = Plugin.prototype.defaults;
+	$[ pluginName ].defaults = PluginModule.prototype.defaults;
 
 	$.fn[ pluginName ] = function ( options ) {
 
 		this.each(function () {
 			if ( !$.data( this, pluginName ) ) {
-				$.data( this, pluginName, new Plugin( this, options ).init() );
+				$.data( this, pluginName, new PluginModule( this, options ).init() );
 			}
 		});
 
