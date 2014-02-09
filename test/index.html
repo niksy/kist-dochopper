@@ -56,10 +56,13 @@
 						flowInto: "hop3",
 						onMediaQuery: "screen and (min-width:300px)"
 					}
-				]
+				],
+				onContextSwitch: function () {
+					console.log( 2 );
+				}
 			});
 
-			el.on('kist.dochopper.contextSwitch', function () {
+			el.on('contextSwitch.kist.dochopper', function () {
 				console.log( 3 );
 			});
 

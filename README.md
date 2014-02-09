@@ -65,11 +65,14 @@ Callback for when context switching is complete, either when entering or exiting
 
 ## Events
 
-#### `kist.dochopper.contextSwitch`
+#### `contextSwitch.kist.dochopper`
 
 Attached to: calling element
 
 Same as `onContextSwitch` option.
+**Caution**: won’t get called on start if defined after plugin initialization.
+In this case, it’s better to use `onContextSwitch` option or define event handler
+before plugin initialization.
 
 ## FOUC
 
