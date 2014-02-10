@@ -1,4 +1,4 @@
-/* kist-dochopper 0.1.2 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
+/* kist-dochopper 0.1.3 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
 ;(function ( $, window, document, undefined ) {
 
 	var o                    = {};
@@ -80,19 +80,19 @@
 			return;
 		}
 
-		$.each( this.flowConditions, $.proxy(function ( index, object ) {
+		$.each( this.flowConditions, $.proxy(function ( index, dataObject ) {
 
-			object.generated            = {};
-			object.generated.mq         = window.matchMedia( object.onMediaQuery );
-			object.generated.flowIntoEl = $('[data-' + pluginDomNamespace + '-flow-from="' + object.flowInto + '"]');
+			dataObject.generated            = {};
+			dataObject.generated.mq         = window.matchMedia( dataObject.onMediaQuery );
+			dataObject.generated.flowIntoEl = $('[data-' + pluginDomNamespace + '-flow-from="' + dataObject.flowInto + '"]');
 
-			object.generated.mq.addListener($.proxy (function ( pMq ) {
+			dataObject.generated.mq.addListener($.proxy (function ( pMq ) {
 
-				this.contextSwitch( pMq, object.generated.flowIntoEl );
+				this.contextSwitch( pMq, dataObject.generated.flowIntoEl );
 
 			}, this));
 
-			this.contextSwitch( object.generated.mq, object.generated.flowIntoEl, true );
+			this.contextSwitch( dataObject.generated.mq, dataObject.generated.flowIntoEl, true );
 
 		}, this));
 
@@ -123,12 +123,12 @@
 
 		} else {
 
-			$.each( this.flowConditions, $.proxy(function ( index, object ) {
+			$.each( this.flowConditions, $.proxy(function ( index, dataObject ) {
 
 				/**
 				 * Exit early if we don’t have generated data (e.g. MQs and DOM refs).
 				 */
-				if ( !('generated' in object) ) {
+				if ( !('generated' in dataObject) ) {
 					return;
 				}
 
@@ -138,8 +138,8 @@
 				 *
 				 * @type {Boolean}
 				 */
-				if ( object.generated.mq.matches === true ) {
-					this.contextSwitch( object.generated.mq, object.generated.flowIntoEl );
+				if ( dataObject.generated.mq.matches === true ) {
+					this.contextSwitch( dataObject.generated.mq, dataObject.generated.flowIntoEl );
 					return false;
 				}
 
@@ -185,6 +185,9 @@
 
 		this.each(function () {
 			if ( !$.data( this, pluginName ) ) {
+				if ( typeof(options) == 'undefined' && !$(this).data( pluginDomNamespace + '-conditions' ) ) {
+					return;
+				}
 				$.data( this, pluginName, new PluginModule( this, options ).init() );
 			}
 		});
