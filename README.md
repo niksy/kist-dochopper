@@ -69,7 +69,7 @@ Callback for when context switching is complete, either when entering or exiting
 
 Attached to: calling element
 
-Same as `onContextSwitch` option.
+Same as `onContextSwitch` option.  
 **Caution**: won’t get called on start if defined after plugin initialization.
 In this case, it’s better to use `onContextSwitch` option or define event handler
 before plugin initialization.
@@ -95,3 +95,17 @@ are ready to be displayed.
     visibility:visible;
 }
 ```
+
+## Caveats
+
+Since media queries are highly flexible in nature, merging list of conditions
+from data attributes and passed options while initializing plugin can lead to
+one unexpected result: last query in list of merged queries list will get
+applied. Order of conditions are passed parameters and then data attributes.
+My suggestions are:
+
+* Use one of two options and order your media queries by their execution order
+(just like you would do in CSS).
+* Use min- and max-width queries to reduce their range of effect.
+
+I hope I will find solution for this some time in the future :).

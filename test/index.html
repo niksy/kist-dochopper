@@ -25,6 +25,10 @@
 			color:#000;
 			background:hotpink;
 		}
+		.hopper-05 {
+			color:#000;
+			background:goldenrod;
+		}
 	</style>
 </head>
 <body>
@@ -41,6 +45,9 @@
 	<div class="hopper hopper-04" data-kist-dochopper-flow-from="hop3">
 		<b><i>More new content</i></b><br />
 	</div>
+	<div class="hopper hopper-05 hopper-root-01">
+		And again
+	</div>
 
 	<script src="../bower_components/jquery/jquery.min.js"></script>
 	<script src="../src/kist-dochopper.js"></script>
@@ -48,13 +55,11 @@
 
 		$(document).on('ready', function () {
 
-			var el = $('.hopper-root');
-
-			el.KistDochopper({
+			$('.hopper-root').KistDochopper({
 				conditions: [
 					{
 						flowInto: "hop3",
-						onMediaQuery: "screen and (min-width:300px)"
+						onMediaQuery: "screen and (min-width:1000px)"
 					}
 				],
 				onContextSwitch: function () {
@@ -62,9 +67,11 @@
 				}
 			});
 
-			el.on('contextSwitch.kist.dochopper', function () {
+			$('.hopper-root').on('contextSwitch.kist.dochopper', function () {
 				console.log( 3 );
 			});
+
+			$('.hopper-root-01').KistDochopper();
 
 		});
 
