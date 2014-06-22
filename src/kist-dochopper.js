@@ -1,198 +1,256 @@
-/* jshint maxparams: 4 */
 ;(function ( $, window, document, undefined ) {
 
-	var o                    = {};
-	var pluginName           = 'KistDochopper';
-	var pluginDomNamespace   = 'kist-dochopper';
-	var pluginEventNamespace = 'kist.dochopper';
+	var smq = require('sort-media-queries');
 
-	var PluginModule = function ( element, options ) {
-
-		this._element  = element;
-		this.settings  = $.extend( {}, this.defaults, options );
-
-	};
-
-	/**
-	 * Default options
-	 *
-	 * @type {Object}
-	 */
-	o.defaults = {
-		onContextSwitch: function () {}
-	};
-
-	/**
-	 * Initialize plugin
-	 *
-	 * @return {Plugin}
-	 */
-	o.init = function () {
-
-		this.getDomRefs();
-		this.getFlowConditions();
-		this.setFlowListeners();
-
-		return this;
-
-	};
-
-	/**
-	 * Get DOM references
-	 *
-	 * @return {Plugin}
-	 */
-	o.getDomRefs = function () {
-
-		this.domRefs         = {};
-		this.domRefs.element = $( this._element );
-
-	};
-
-	/**
-	 * Get flow conditions. Merge values from `data` attributes and options
-	 * passed to plugin initialization.
-	 *
-	 * @return {Array}
-	 */
-	o.getFlowConditions = function () {
-
-		var metaData = this.domRefs.element.data(pluginDomNamespace + '-conditions');
-
-		this.flowConditions = [];
-
-		if ( typeof(metaData) != 'undefined' ) {
-			this.flowConditions = this.flowConditions.concat(metaData);
+	var plugin = {
+		name: 'dochopper',
+		ns: {
+			css: 'kist-Dochopper',
+			event: '.kist.dochopper',
+			dom: 'kist-dochopper'
+		},
+		error: function ( message ) {
+			throw new Error(plugin.name + ': ' + message);
 		}
+	};
+	plugin.classes = {
+		item: plugin.ns.css + '-item',
+		isReady: 'is-ready'
+	};
+	plugin.publicMethods = ['destroy'];
 
-		if ( typeof(this.settings.conditions) != 'undefined' ) {
-			this.flowConditions = this.flowConditions.concat(this.settings.conditions);
+	var dom = {
+		setup: function () {
+			this.dom         = this.dom || {};
+			this.dom.el      = $(this.element);
+			this.dom.content = this.dom.el.contents();
+		},
+		destroy: function () {
+
+			var set = $();
+
+			set = set.add(this.dom.el);
+
+			$.each(this.conditions, $.proxy(function ( index, condition ) {
+				set = set.add(condition.get.into);
+			}, this));
+
+			set
+				.removeClass(plugin.classes.item)
+				.removeClass(plugin.classes.isReady);
+
 		}
-
 	};
 
-	/**
-	 * Set flow listeners
-	 */
-	o.setFlowListeners = function () {
+	var events = {
+		setupInitial: function () {
 
-		if ( this.domRefs.element.length === 0 ) {
-			return;
-		}
+			this.dom.el.one('init' + this.instance.ens, $.proxy(function ( e, queue ) {
 
-		$.each( this.flowConditions, $.proxy(function ( index, dataObject ) {
+				var element = $();
+				var media = [];
 
-			dataObject.generated            = {};
-			dataObject.generated.mq         = window.matchMedia( dataObject.onMediaQuery );
-			dataObject.generated.flowIntoEl = $('[data-' + pluginDomNamespace + '-flow-from="' + dataObject.flowInto + '"]');
+				$.each(queue, function ( index, item ) {
+					if ( $.isEmptyObject(item) ) {
+						return;
+					}
+					element = element.add(item.into);
+					media.push(item.media);
+				});
 
-			dataObject.generated.mq.addListener($.proxy (function ( pMq ) {
-
-				this.contextSwitch( pMq, dataObject.generated.flowIntoEl );
+				this.options.hopped.call(null, element, media);
+				while ( queue.length > 0 ) {
+					queue.pop();
+				}
 
 			}, this));
 
-			this.contextSwitch( dataObject.generated.mq, dataObject.generated.flowIntoEl, true );
+		},
+		setupListeners: function () {
+
+			$.each(this.conditions, $.proxy(function ( index, condition ) {
+				condition.get.media.addListener(condition.get.listener);
+				hopOnCondition.call(this, condition.get.into, true, condition.get.media);
+			}, this));
+
+			this.dom.el.trigger('init' + this.instance.ens, [this.queue]);
+
+		},
+		setup: function () {
+		},
+		destroy: function () {
+
+			$.each(this.conditions, $.proxy(function ( index, condition ) {
+				condition.get.media.removeListener(condition.get.listener);
+			}, this));
+
+		}
+	};
+
+	var instance = {
+		id: 0,
+		setup: function () {
+			this.instance     = this.instance || {};
+			this.instance.id  = instance.id++;
+			this.instance.ens = plugin.ns.event; // + '.' + this.instance.id;
+		},
+		destroy: function () {
+			delete $.data(this.element)[plugin.name];
+		}
+	};
+
+	function getDomConditions () {
+		var data = this.dom.el.data('hop-conditions');
+		return data ? data : [];
+	}
+
+	function setConditions () {
+
+		this.conditions = this.conditions || [];
+		this.conditions = this.conditions.concat(getDomConditions.call(this), this.options.conditions);
+
+		this.conditions = smq.sortObject(this.conditions, 'media');
+
+		$.each(this.conditions, $.proxy(function ( index, condition ) {
+
+			condition.get          = {};
+			condition.get.media    = window.matchMedia(condition.media);
+			condition.get.into     = $('[data-hop-from="' + condition.into + '"]');
+			condition.get.listener = $.proxy(hopOnCondition, this, condition.get.into, false);
 
 		}, this));
 
-	};
+	}
 
 	/**
-	 * Switch context on MQ
+	 * @param  {jQuery} into
+	 * @param  {Boolean} initial
+	 * @param  {Object} condition
 	 *
-	 * @param  {Object} pMqCondition
-	 * @param  {$Object} pFlowIntoEl
-	 * @param  {Boolean} pInitial
-	 *
-	 * @return {Ui}
+	 * @return {}
 	 */
-	o.contextSwitch = function ( pMqCondition, pFlowIntoEl, pInitial ) {
+	function hopOnCondition ( into, initial, condition ) {
 
-		if ( pMqCondition.matches ) {
+		var data = {};
 
-			/**
-			 * Get flowing content after all initial matching of MQ is done.
-			 * This way we can catch non-empty flow-from elements.
-			 */
-			if ( !('flowingContent' in this.domRefs) ) {
-				this.domRefs.flowingContent = this.domRefs.element.children();
-			}
-
-			this.domRefs.flowingContent.appendTo( pFlowIntoEl );
-
+		if ( condition.matches ) {
+			data = {
+				media: condition,
+				into: into
+			};
+			this.queueActive.push(data);
 		} else {
-
-			$.each( this.flowConditions, $.proxy(function ( index, dataObject ) {
-
-				/**
-				 * Exit early if we don’t have generated data (e.g. MQs and DOM refs).
-				 */
-				if ( !('generated' in dataObject) ) {
-					return;
+			if ( !initial ) {
+				this.queueActive.pop();
+				if ( this.queueActive.length === 0 ) {
+					data = {
+						media: null,
+						into: this.dom.el
+					};
+				} else {
+					data = this.queueActive[this.queueActive.length - 1];
 				}
-
-				/**
-				 * First matching MQ is good one so we use that for switching
-				 * when context is changed.
-				 *
-				 * @type {Boolean}
-				 */
-				if ( dataObject.generated.mq.matches === true ) {
-					this.contextSwitch( dataObject.generated.mq, dataObject.generated.flowIntoEl );
-					return false;
-				}
-
-				/**
-				 * If no matching MQs have been found, move content to
-				 * initial element.
-				 *
-				 * @type {Boolean}
-				 */
-				if ( index === (this.flowConditions.length - 1) ) {
-					if ( 'flowingContent' in this.domRefs ) {
-						this.domRefs.flowingContent.appendTo(this.domRefs.element);
-					}
-				}
-
-			}, this));
-
+			}
 		}
 
 		/**
 		 * Set flag when flowing elements are ready.
 		 * This is so we can avoid FOUC on contexts where content has to flow.
 		 */
-		if ( typeof( pInitial ) !== 'undefined' && pInitial === true ) { /* 1 */
-			this.domRefs.element.addClass( pluginName + '--is-ready' );
-			pFlowIntoEl.addClass( pluginName + '--is-ready' );
+		if ( initial ) {
+			this.queue.push(data);
+			this.dom.el.add(into)
+				.addClass(plugin.classes.item)
+				.addClass(plugin.classes.isReady);
 		}
 
+		if ( !$.isEmptyObject(data) ) {
+			this.hop(data.into, [data.into, data.media]);
+		}
+
+	}
+
+	/**
+	 * @class
+	 *
+	 * @param {Element} element
+	 * @param {Object} options
+	 */
+	function Dochopper ( element, options ) {
+
+		this.element = element;
+		this.options = $.extend({}, this.defaults, options);
+
+		this.queueActive = [];
+		this.queue = [];
+
+		instance.setup.call(this);
+		dom.setup.call(this);
+
+		setConditions.call(this);
+
+		events.setupInitial.call(this);
+		events.setupListeners.call(this);
+		events.setup.call(this);
+
+	}
+
+	$.extend(Dochopper.prototype, {
+
 		/**
-		 * Callback after everything is finished.
+		 * Switch context on MQ
+		 *
+		 * @param  {Object} condition
+		 * @param  {jQuery} into
+		 * @param  {Boolean} initial
+		 *
+		 * @return {}
 		 */
-		this.settings.onContextSwitch();
-		this.domRefs.element.trigger( 'contextSwitch.' + pluginEventNamespace );
+		hop: function ( into, data ) {
+			this.dom.content.detach().appendTo(into);
+			if ( !this.queue.length ) {
+				this.options.hopped.apply(null, data);
+				this.dom.el.trigger('hop' + this.instance.ens, data);
+			}
+		},
 
-	};
+		destroy: function () {
+			dom.destroy.call(this);
+			events.destroy.call(this);
+			instance.destroy.call(this);
+		},
 
-	$.extend( PluginModule.prototype, o );
+		/**
+		 * Default options
+		 *
+		 * @type {Object}
+		 */
+		defaults: {
+			conditions: [],
+			hopped: function () {}
+		}
 
-	$[ pluginName ]          = {};
-	$[ pluginName ].defaults = PluginModule.prototype.defaults;
+	});
 
-	$.fn[ pluginName ] = function ( options ) {
+	$.kist = $.kist || {};
 
-		this.each(function () {
-			if ( !$.data( this, pluginName ) ) {
-				if ( typeof(options) == 'undefined' && !$(this).data( pluginDomNamespace + '-conditions' ) ) {
-					return;
+	$.fn[plugin.name] = function ( options ) {
+
+		if ( typeof(options) === 'string' && $.inArray(options, plugin.publicMethods) !== -1 ) {
+			return this.each(function () {
+				var pluginInstance = $.data(this, plugin.name);
+				if ( pluginInstance ) {
+					pluginInstance[options]();
 				}
-				$.data( this, pluginName, new PluginModule( this, options ).init() );
+			});
+		}
+
+		return this.each(function () {
+			if ( !$.data(this, plugin.name) ) {
+				$.data(this, plugin.name, new Dochopper(this, options));
 			}
 		});
 
-		return this;
 	};
 
 })( jQuery, window, document );

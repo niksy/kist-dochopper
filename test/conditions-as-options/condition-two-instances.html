@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Conditions as options, two instances</title>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<link rel="stylesheet" href="../assets/style/style.css" />
+</head>
+<body>
+
+	<!--[if lt IE 9]>
+		<div class="log">
+			<pre><code class="log-content"></code></pre>
+			<button type="button" class="log-clear">Clear</button>
+		</div>
+	<![endif]-->
+
+	<div class="hopper hopper-01 hopper-a">
+		<div>
+			Div content
+			<div>Inner div content</div>
+		</div>
+		<b>Original content</b><br />
+	</div>
+	<div class="hopper hopper-02" data-hop-from="hop1">
+		<i>New content</i><br />
+	</div>
+	<div class="hopper hopper-03" data-hop-from="hop2">
+		<u>Newer content</u><br />
+	</div>
+	<div class="hopper hopper-04 hopper-b">
+		<b><i>More new content</i></b><br />
+		<div data-hop-from="hop3">
+			<div>More content for first content</div>
+		</div>
+	</div>
+	<div class="hopper hopper-05" data-hop-from="hop4">
+		And again
+	</div>
+
+	<script src="../../bower_components/jquery/dist/jquery.min.js"></script>
+	<!--[if lt IE 9]><script src="../../bower_components/media-match/media.match.min.js"></script><![endif]-->
+	<script src="../../src/out/kist-dochopper.js"></script>
+	<script>
+
+		$('.log-clear').on('click', function () {
+			$('.log-content').empty();
+		});
+
+		$('.hopper-a').dochopper({
+			conditions: [
+				{
+					into: 'hop3',
+					media: 'screen and (min-width:1000px)'
+				}
+			],
+			hopped: function ( element, media ) {
+				if ( !+'\v1' ) {
+					var data = '';
+					data += JSON.stringify(element, null, '\t');
+					data += JSON.stringify(media, null, '\t');
+					$('.log-content').append('<hr />');
+					$('.log-content').append(data);
+				} else {
+					console.log( arguments );
+					console.log('Hopped!');
+				}
+			}
+		});
+
+		$('.hopper-b').dochopper({
+			conditions: [
+				{
+					into: 'hop4',
+					media: 'screen and (min-width:1100px)'
+				}
+			],
+			hopped: function ( element, media ) {
+				if ( !+'\v1' ) {
+					var data = '';
+					data += JSON.stringify(element, null, '\t');
+					data += JSON.stringify(media, null, '\t');
+					$('.log-content').append('<hr />');
+					$('.log-content').append(data);
+				} else {
+					console.log( arguments );
+					console.log('Hopped!');
+				}
+			}
+		});
+
+	</script>
+
+</body>
+</html>

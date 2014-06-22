@@ -2,30 +2,36 @@
   "name": "kist-dochopper",
   "version": "0.1.3",
   "description": "Move elements on page depending on media query.",
-  "main": "src/kist-dochopper.js",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:niksy/kist-dochopper.git"
-  },
+  "author": "Ivan Nikolić",
+  "license": "MIT",
+  "main": "Gruntfile.js",
   "directories": {
     "test": "test"
+  },
+  "devDependencies": {
+    "browserify": "^4.1.11",
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^2.1.0",
+    "grunt-bump": "^0.0.13",
+    "grunt-contrib-concat": "^0.4.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.4.0",
+    "grunt-jscs-checker": "^0.4.4",
+    "sort-media-queries": "git://github.com/niksy/sort-media-queries.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/niksy/kist-dochopper.git"
   },
   "keywords": [
     "mq",
     "jump"
   ],
-  "author": "Ivan Nikolić",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/niksy/kist-dochopper/issues"
   },
-  "homepage": "https://github.com/niksy/kist-dochopper",
-  "devDependencies": {
-    "grunt": "~0.4.2",
-    "grunt-contrib-concat": "~0.3.0",
-    "grunt-contrib-uglify": "~0.2.7",
-    "grunt-bump": "0.0.13",
-    "grunt-jscs-checker": "~0.3.2",
-    "grunt-contrib-jshint": "~0.8.0"
-  }
+  "homepage": "https://github.com/niksy/kist-dochopper"
 }

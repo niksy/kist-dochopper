@@ -1,0 +1,34 @@
+.hopper {
+	width:100px; height:100px;
+	margin:10px;
+}
+.hopper-01 {
+	color:#fff;
+	background:#f00;
+}
+.hopper-02 {
+	color:#000;
+	background:#ff0;
+}
+.hopper-03 {
+	color:#000;
+	background:#0f0;
+}
+.hopper-04 {
+	color:#000;
+	background:hotpink;
+}
+.hopper-05 {
+	color:#000;
+	background:goldenrod;
+}
+
+.controls {
+	position:fixed; right:10px; top:10px;
+}
+
+.log {
+	position:fixed; right:10px; bottom:10px;
+	padding:10px;
+	background:#eee;
+}
