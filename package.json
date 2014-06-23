@@ -1,6 +1,6 @@
 {
   "name": "kist-dochopper",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Move elements on page depending on media query.",
   "author": "Ivan Nikolić",
   "license": "MIT",
