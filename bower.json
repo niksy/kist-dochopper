@@ -22,6 +22,9 @@
     "matchmedia": "~0.1.0",
     "media-match": "niksy/media-match#~2.0.3"
   },
+  "devDependencies": {
+    "jquery": "1"
+  },
   "homepage": "https://github.com/niksy/kist-dochopper",
   "keywords": [
     "mq",

@@ -72,7 +72,10 @@ module.exports = function ( grunt ) {
 		},
 
 		browserify: {
-			src: {
+			options: {
+				transform: ['browserify-shim']
+			},
+			dist: {
 				files: {
 					'src/out/kist-dochopper.js': ['src/kist-dochopper.js']
 				},
@@ -98,7 +101,7 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks('grunt-browserify');
 
 	grunt.registerTask('stylecheck', ['jshint:main', 'jscs:main']);
-	grunt.registerTask('default', ['stylecheck', 'browserify:src', 'concat', 'uglify']);
+	grunt.registerTask('default', ['stylecheck', 'browserify:dist', 'concat:dist', 'uglify:dist']);
 	grunt.registerTask('watch', ['browserify:watch']);
 	grunt.registerTask('releasePatch', ['bump-only:patch', 'default', 'bump-commit']);
 	grunt.registerTask('releaseMinor', ['bump-only:minor', 'default', 'bump-commit']);

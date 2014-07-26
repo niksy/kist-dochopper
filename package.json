@@ -10,13 +10,14 @@
   },
   "devDependencies": {
     "browserify": "^4.1.11",
+    "browserify-shim": "^3.6.0",
     "grunt": "^0.4.5",
     "grunt-browserify": "^2.1.0",
     "grunt-bump": "^0.0.13",
     "grunt-contrib-concat": "^0.4.0",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-uglify": "^0.4.0",
-    "grunt-jscs-checker": "^0.4.4",
+    "grunt-jscs": "^0.6.1",
     "sort-media-queries": "git://github.com/niksy/sort-media-queries.git"
   },
   "scripts": {
@@ -33,5 +34,8 @@
   "bugs": {
     "url": "https://github.com/niksy/kist-dochopper/issues"
   },
-  "homepage": "https://github.com/niksy/kist-dochopper"
+  "homepage": "https://github.com/niksy/kist-dochopper",
+  "browserify-shim": {
+    "jquery": "global:$"
+  }
 }
