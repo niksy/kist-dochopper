@@ -45,7 +45,7 @@ See [options → hopped](#hopped).
 
 #### `hop-conditions`
 
-Type: `Object`
+Type: `JSON Object`
 
 See [options → conditions](#conditions).
 
