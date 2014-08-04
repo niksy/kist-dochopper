@@ -104,15 +104,34 @@ var instance = {
 	}
 };
 
+/**
+ * Wrap non-array conditions to array of conditions
+ *
+ * @param  {*} conditions
+ *
+ * @return {Array}
+ */
+function wrapConditions ( conditions ) {
+	if ( $.type(conditions) === 'array' ) {
+		return conditions;
+	}
+	return [conditions];
+}
+
+/**
+ * Get conditions from DOM attribute
+ *
+ * @return {Array}
+ */
 function getDomConditions () {
 	var data = this.dom.el.data('hop-conditions');
-	return data ? data : [];
+	return data ? wrapConditions(data) : [];
 }
 
 function setConditions () {
 
 	this.conditions = this.conditions || [];
-	this.conditions = this.conditions.concat(getDomConditions.call(this), this.options.conditions);
+	this.conditions = this.conditions.concat(getDomConditions.call(this), wrapConditions(this.options.conditions));
 
 	this.conditions = smq.sortObject(this.conditions, 'media');
 
