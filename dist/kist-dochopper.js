@@ -1,4 +1,4 @@
-/*! kist-dochopper 0.2.2 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
+/*! kist-dochopper 0.2.3 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 module.exports = function extend (object) {
@@ -381,8 +381,6 @@ var events = {
 		this.dom.el.trigger('init' + this.instance.ens, [this.queue]);
 
 	},
-	setup: function () {
-	},
 	destroy: function () {
 
 		$.each(this.conditions, $.proxy(function ( index, condition ) {
@@ -404,15 +402,34 @@ var instance = {
 	}
 };
 
+/**
+ * Wrap non-array conditions to array of conditions
+ *
+ * @param  {*} conditions
+ *
+ * @return {Array}
+ */
+function wrapConditions ( conditions ) {
+	if ( $.type(conditions) === 'array' ) {
+		return conditions;
+	}
+	return [conditions];
+}
+
+/**
+ * Get conditions from DOM attribute
+ *
+ * @return {Array}
+ */
 function getDomConditions () {
 	var data = this.dom.el.data('hop-conditions');
-	return data ? data : [];
+	return data ? wrapConditions(data) : [];
 }
 
 function setConditions () {
 
 	this.conditions = this.conditions || [];
-	this.conditions = this.conditions.concat(getDomConditions.call(this), this.options.conditions);
+	this.conditions = this.conditions.concat(getDomConditions.call(this), wrapConditions(this.options.conditions));
 
 	this.conditions = smq.sortObject(this.conditions, 'media');
 
@@ -435,7 +452,7 @@ function setConditions () {
  * @return {}
  */
 function triggerHop ( args ) {
-	this.options.hopped.apply(null, args);
+	this.options.hopped.apply(this.element, args);
 	this.dom.el.trigger('hop' + this.instance.ens, args);
 }
 
@@ -461,7 +478,7 @@ function hopOnCondition ( into, initial, condition ) {
 			this.queueActive.pop();
 			if ( this.queueActive.length === 0 ) {
 				data = {
-					media: null,
+					media: {},
 					into: this.dom.el
 				};
 			} else {
@@ -488,6 +505,18 @@ function hopOnCondition ( into, initial, condition ) {
 }
 
 /**
+ * @param  {Object} data
+ *
+ * @return {Boolean}
+ */
+function shouldReact ( data ) {
+	if ( $.isEmptyObject(data) || data.matches ) {
+		return true;
+	}
+	return false;
+}
+
+/**
  * @class
  *
  * @param {Element} element
@@ -508,25 +537,25 @@ function Dochopper ( element, options ) {
 
 	events.setupInitial.call(this);
 	events.setupListeners.call(this);
-	events.setup.call(this);
 
 }
 
 $.extend(Dochopper.prototype, {
 
 	/**
-	 * Switch context on MQ
-	 *
-	 * @param  {Object} condition
 	 * @param  {jQuery} into
-	 * @param  {Boolean} initial
+	 * @param  {Object} data
 	 *
 	 * @return {}
 	 */
 	hop: function ( into, data ) {
-		this.dom.content.detach().appendTo(into);
+		if ( shouldReact(data[1]) ) {
+			this.dom.content.detach().appendTo(into);
+		}
 		if ( !this.queue.length ) {
-			triggerHop.call(this, data);
+			if ( shouldReact(data[1]) ) {
+				triggerHop.call(this, data);
+			}
 		}
 	},
 
