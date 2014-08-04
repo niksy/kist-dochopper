@@ -133,6 +133,8 @@ If you have delegated events on some elements which will at some point be switch
 
 If you use combination of `min-` and `max-` media queries (e.g. `screen and (min-width:100px) and (max-width:299px)`), those media queries won’t be shown in inital list of media queries which where activated if the current viewport is larger than that media query condition. This is normal media query listener behavior.
 
+Also, exiting that media query will trigger next matching query and the last ones which also match current viewport.
+
 ## Browser support
 
 Tested in IE8+ and all modern browsers.
