@@ -83,8 +83,6 @@ var events = {
 		this.dom.el.trigger('init' + this.instance.ens, [this.queue]);
 
 	},
-	setup: function () {
-	},
 	destroy: function () {
 
 		$.each(this.conditions, $.proxy(function ( index, condition ) {
@@ -137,7 +135,7 @@ function setConditions () {
  * @return {}
  */
 function triggerHop ( args ) {
-	this.options.hopped.apply(null, args);
+	this.options.hopped.apply(this.element, args);
 	this.dom.el.trigger('hop' + this.instance.ens, args);
 }
 
@@ -163,7 +161,7 @@ function hopOnCondition ( into, initial, condition ) {
 			this.queueActive.pop();
 			if ( this.queueActive.length === 0 ) {
 				data = {
-					media: null,
+					media: {},
 					into: this.dom.el
 				};
 			} else {
@@ -190,6 +188,18 @@ function hopOnCondition ( into, initial, condition ) {
 }
 
 /**
+ * @param  {Object} data
+ *
+ * @return {Boolean}
+ */
+function shouldReact ( data ) {
+	if ( $.isEmptyObject(data) || data.matches ) {
+		return true;
+	}
+	return false;
+}
+
+/**
  * @class
  *
  * @param {Element} element
@@ -210,25 +220,25 @@ function Dochopper ( element, options ) {
 
 	events.setupInitial.call(this);
 	events.setupListeners.call(this);
-	events.setup.call(this);
 
 }
 
 $.extend(Dochopper.prototype, {
 
 	/**
-	 * Switch context on MQ
-	 *
-	 * @param  {Object} condition
 	 * @param  {jQuery} into
-	 * @param  {Boolean} initial
+	 * @param  {Object} data
 	 *
 	 * @return {}
 	 */
 	hop: function ( into, data ) {
-		this.dom.content.detach().appendTo(into);
+		if ( shouldReact(data[1]) ) {
+			this.dom.content.detach().appendTo(into);
+		}
 		if ( !this.queue.length ) {
-			triggerHop.call(this, data);
+			if ( shouldReact(data[1]) ) {
+				triggerHop.call(this, data);
+			}
 		}
 	},
 

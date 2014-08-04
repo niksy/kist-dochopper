@@ -31,7 +31,7 @@ Provides: `Array|jQuery, Array|Object`
 
 Callback for when context switching is complete, either when entering or exiting media query.
 
-Array for first and second argument will be returned on plugin initialization. Every array contains list of active conditions, first argument containing elements which had their content filled with initial content, and second argument containing list of media query objects which were activated.
+Array for first and second argument will be returned on plugin initialization. Every array contains list of currently active conditions, first argument containing elements which had their content filled with initial content, and second argument containing list of media query objects which are currently activate and correspond to list of containing elements in first argument.
 
 Every next condition matching or unmatching will return active jQuery element and media query object.
 
@@ -128,6 +128,10 @@ To prevent this type of problems, you can use some simple CSS trickery to visual
 ### Delegated events
 
 If you have delegated events on some elements which will at some point be switched to another place, those events won’t work as intended since now those elements are in the new place.
+
+### Combination of `min-` and `max-` media queries
+
+If you use combination of `min-` and `max-` media queries (e.g. `screen and (min-width:100px) and (max-width:299px)`), those media queries won’t be shown in inital list of media queries which where activated if the current viewport is larger than that media query condition. This is normal media query listener behavior.
 
 ## Browser support
 
