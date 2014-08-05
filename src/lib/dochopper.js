@@ -180,7 +180,10 @@ function hopOnCondition ( into, initial, condition ) {
 			this.queueActive.pop();
 			if ( this.queueActive.length === 0 ) {
 				data = {
-					media: {},
+					media: {
+						matches: true,
+						media: 'root'
+					},
 					into: this.dom.el
 				};
 			} else {
@@ -200,22 +203,10 @@ function hopOnCondition ( into, initial, condition ) {
 			.addClass(plugin.classes.isReady);
 	}
 
-	if ( !$.isEmptyObject(data) ) {
-		this.hop(data.into, [data.into, data.media]);
+	if ( !$.isEmptyObject(data) && data.media.matches ) {
+		this.hop(data.into, data.media);
 	}
 
-}
-
-/**
- * @param  {Object} data
- *
- * @return {Boolean}
- */
-function shouldReact ( data ) {
-	if ( $.isEmptyObject(data) || data.matches ) {
-		return true;
-	}
-	return false;
 }
 
 /**
@@ -246,18 +237,14 @@ $.extend(Dochopper.prototype, {
 
 	/**
 	 * @param  {jQuery} into
-	 * @param  {Object} data
+	 * @param  {Object} media
 	 *
 	 * @return {}
 	 */
-	hop: function ( into, data ) {
-		if ( shouldReact(data[1]) ) {
-			this.dom.content.detach().appendTo(into);
-		}
+	hop: function ( into, media ) {
+		this.dom.content.detach().appendTo(into);
 		if ( !this.queue.length ) {
-			if ( shouldReact(data[1]) ) {
-				triggerHop.call(this, data);
-			}
+			triggerHop.call(this, [into, media]);
 		}
 	},
 
