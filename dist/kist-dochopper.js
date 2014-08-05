@@ -1,4 +1,4 @@
-/*! kist-dochopper 0.2.3 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
+/*! kist-dochopper 0.2.4 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 module.exports = function extend (object) {
@@ -478,7 +478,10 @@ function hopOnCondition ( into, initial, condition ) {
 			this.queueActive.pop();
 			if ( this.queueActive.length === 0 ) {
 				data = {
-					media: {},
+					media: {
+						matches: true,
+						media: 'root'
+					},
 					into: this.dom.el
 				};
 			} else {
@@ -498,22 +501,10 @@ function hopOnCondition ( into, initial, condition ) {
 			.addClass(plugin.classes.isReady);
 	}
 
-	if ( !$.isEmptyObject(data) ) {
-		this.hop(data.into, [data.into, data.media]);
+	if ( !$.isEmptyObject(data) && data.media.matches ) {
+		this.hop(data.into, data.media);
 	}
 
-}
-
-/**
- * @param  {Object} data
- *
- * @return {Boolean}
- */
-function shouldReact ( data ) {
-	if ( $.isEmptyObject(data) || data.matches ) {
-		return true;
-	}
-	return false;
 }
 
 /**
@@ -544,18 +535,14 @@ $.extend(Dochopper.prototype, {
 
 	/**
 	 * @param  {jQuery} into
-	 * @param  {Object} data
+	 * @param  {Object} media
 	 *
 	 * @return {}
 	 */
-	hop: function ( into, data ) {
-		if ( shouldReact(data[1]) ) {
-			this.dom.content.detach().appendTo(into);
-		}
+	hop: function ( into, media ) {
+		this.dom.content.detach().appendTo(into);
 		if ( !this.queue.length ) {
-			if ( shouldReact(data[1]) ) {
-				triggerHop.call(this, data);
-			}
+			triggerHop.call(this, [into, media]);
 		}
 	},
 
