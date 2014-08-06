@@ -6,10 +6,23 @@ $('.hopper').dochopper({
 			media: 'screen and (min-width:1000px)'
 		},
 		{
-			into: 'hop1',
+			into: $('div'),
+			media: 'screen and (min-width:1200px)'
+		},
+		{
+			into: function () {
+				if ( $('body').hasClass('foo') ) {
+					return 'foo2';
+				} else {
+					return 'hop4';
+				}
+			},
 			media: 'screen and (min-width:1200px)'
 		}
 	],
+	condition: function () {
+		return true;
+	},
 	hopped: function ( element, media ) {
 		console.log('Hopped!');
 	}

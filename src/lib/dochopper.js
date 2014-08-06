@@ -18,7 +18,7 @@ plugin.classes = {
 	item: plugin.ns.css + '-item',
 	isReady: 'is-ready'
 };
-plugin.publicMethods = ['destroy'];
+plugin.publicMethods = ['destroy','rehop'];
 
 var dom = {
 	setup: function () {
@@ -105,6 +105,31 @@ var instance = {
 };
 
 /**
+ * @this {Dochopper}
+ *
+ * @param  {String|Function|jQuery} into
+ *
+ * @return {jQuery}
+ */
+function getIntoElement ( into ) {
+
+	var el;
+
+	if ( typeof(into) === 'function' ) {
+		into = into.call(this.element);
+	}
+
+	if ( typeof(into) === 'string' ) {
+		el = '[data-hop-from="' + into + '"]';
+	}
+	if ( into instanceof jQuery ) {
+		el = into;
+	}
+
+	return $(el);
+}
+
+/**
  * Wrap non-array conditions to array of conditions
  *
  * @param  {*} conditions
@@ -139,7 +164,7 @@ function setConditions () {
 
 		condition.get          = {};
 		condition.get.media    = window.matchMedia(condition.media);
-		condition.get.into     = $('[data-hop-from="' + condition.into + '"]');
+		condition.get.into     = getIntoElement.call(this, condition.into);
 		condition.get.listener = $.proxy(hopOnCondition, this, condition.get.into, false);
 
 	}, this));
@@ -252,6 +277,33 @@ $.extend(Dochopper.prototype, {
 		dom.destroy.call(this);
 		events.destroy.call(this);
 		instance.destroy.call(this);
+	},
+
+	rehop: function () {
+
+		var set = [];
+
+		$.each(this.conditions, $.proxy(function ( index, condition ) {
+			if ( condition.get.media.matches ) {
+
+				var el = getIntoElement.call(this, condition.into);
+
+				// Do this only if new element is not the same as the first cached element
+				if ( !condition.get.into.is(el) ) {
+					condition.get.into = el;
+					condition.get.media.removeListener(condition.get.listener);
+					condition.get.listener = $.proxy(hopOnCondition, this, condition.get.into, false);
+					condition.get.media.addListener(condition.get.listener);
+					set.push([condition.get.into, condition.get.media]);
+				}
+			}
+
+		}, this));
+
+		if ( set.length ) {
+			this.hop.apply(this, set[set.length - 1]);
+		}
+
 	},
 
 	/**

@@ -16,15 +16,22 @@ Returns: `jQuery`
 
 #### options
 
-Type: `Object`
+Type: `Object|String`
 
-##### conditions
+##### Options defined as `Object`
+
+###### conditions
 
 Type: `Array`
 
 Contains objects which define conditions where and when should specific element be moved when media query is matched or unmatched.
 
-##### hopped
+Arguments are:
+
+* **into** (type: `String|Function|jQuery`) - To which element should content hop to.
+* **condition** (type: `String`) - Media query condition on which upon content should hop.
+
+###### hopped
 
 Type: `Function`  
 Provides: `Array|jQuery, Array|Object`
@@ -35,7 +42,17 @@ Array for first and second argument will be returned on plugin initialization. E
 
 Every next condition matching or unmatching will return active jQuery element and media query object.
 
-### Events
+##### Options defined as `String`
+
+###### destroy
+
+Destroy plugin instance.
+
+###### rehop
+
+Retrigger hopping for current instance. Useful if hop-from element depends on some external conditions.
+
+#### Events
 
 #### `hop.kist.dochopper`
 
@@ -84,7 +101,17 @@ $('.hopper-a').dochopper({
 			media: 'screen and (min-width:1000px)'
 		},
 		{
-			into: 'hop2',
+			into: $('.hop2'),
+			media: 'screen and (min-width:1200px)'
+		},
+		{
+			into: function () {
+				if ( $('body').hasClass('foo') ) {
+					return 'hop3';
+				} else {
+					return 'hop4';
+				}
+			},
 			media: 'screen and (min-width:1200px)'
 		}
 	],
@@ -98,6 +125,12 @@ $('.hopper-b').dochopper();
 $('.hopper-a, .hopper-b').on('hop.kist.dochopper', function ( e, element, media ) {
 	// Hopped!
 });
+```
+
+Retrigger instance.
+
+```js
+$('.hopper').dochopper('rehop');
 ```
 
 Destroy plugin instance.
