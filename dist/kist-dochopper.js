@@ -1,4 +1,4 @@
-/*! kist-dochopper 0.2.4 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
+/*! kist-dochopper 0.2.5 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 module.exports = function extend (object) {
@@ -316,7 +316,7 @@ plugin.classes = {
 	item: plugin.ns.css + '-item',
 	isReady: 'is-ready'
 };
-plugin.publicMethods = ['destroy'];
+plugin.publicMethods = ['destroy','rehop'];
 
 var dom = {
 	setup: function () {
@@ -403,6 +403,31 @@ var instance = {
 };
 
 /**
+ * @this {Dochopper}
+ *
+ * @param  {String|Function|jQuery} into
+ *
+ * @return {jQuery}
+ */
+function getIntoElement ( into ) {
+
+	var el;
+
+	if ( typeof(into) === 'function' ) {
+		into = into.call(this.element);
+	}
+
+	if ( typeof(into) === 'string' ) {
+		el = '[data-hop-from="' + into + '"]';
+	}
+	if ( into instanceof jQuery ) {
+		el = into;
+	}
+
+	return $(el);
+}
+
+/**
  * Wrap non-array conditions to array of conditions
  *
  * @param  {*} conditions
@@ -437,7 +462,7 @@ function setConditions () {
 
 		condition.get          = {};
 		condition.get.media    = window.matchMedia(condition.media);
-		condition.get.into     = $('[data-hop-from="' + condition.into + '"]');
+		condition.get.into     = getIntoElement.call(this, condition.into);
 		condition.get.listener = $.proxy(hopOnCondition, this, condition.get.into, false);
 
 	}, this));
@@ -550,6 +575,33 @@ $.extend(Dochopper.prototype, {
 		dom.destroy.call(this);
 		events.destroy.call(this);
 		instance.destroy.call(this);
+	},
+
+	rehop: function () {
+
+		var set = [];
+
+		$.each(this.conditions, $.proxy(function ( index, condition ) {
+			if ( condition.get.media.matches ) {
+
+				var el = getIntoElement.call(this, condition.into);
+
+				// Do this only if new element is not the same as the first cached element
+				if ( !condition.get.into.is(el) ) {
+					condition.get.into = el;
+					condition.get.media.removeListener(condition.get.listener);
+					condition.get.listener = $.proxy(hopOnCondition, this, condition.get.into, false);
+					condition.get.media.addListener(condition.get.listener);
+					set.push([condition.get.into, condition.get.media]);
+				}
+			}
+
+		}, this));
+
+		if ( set.length ) {
+			this.hop.apply(this, set[set.length - 1]);
+		}
+
 	},
 
 	/**
