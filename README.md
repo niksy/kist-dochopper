@@ -48,7 +48,7 @@ Every next condition matching or unmatching will return active jQuery element an
 
 ###### namespace
 
-Type: `String`
+Type: `String`  
 Default: `kist-Dochopper`
 
 Default HTML class namespace.
