@@ -29,18 +29,29 @@ Contains objects which define conditions where and when should specific element 
 Arguments are:
 
 * **into** (type: `String|Function|jQuery`) - To which element should content hop to.
+	* If defined as `String`, it is the value of `[data-hop-from]` attribute
+	* If defined as `Function`, it is the return value which can be `String` or `jQuery`
+	* If defined as `jQuery`, it is the jQuery element found inside document
 * **condition** (type: `String`) - Media query condition on which upon content should hop.
 
-###### hopped
+###### hop
 
 Type: `Function`  
-Provides: `Array|jQuery, Array|Object`
+Provides: `Array|jQuery, Array|Object`  
+Event: `dochopperhop`
 
 Callback for when context switching is complete, either when entering or exiting media query.
 
 Array for first and second argument will be returned on plugin initialization. Every array contains list of currently active conditions, first argument containing elements which had their content filled with initial content, and second argument containing list of media query objects which are currently activate and correspond to list of containing elements in first argument.
 
 Every next condition matching or unmatching will return active jQuery element and media query object.
+
+###### namespace
+
+Type: `String`
+Default: `kist-Dochopper`
+
+Default HTML class namespace.
 
 ##### Options defined as `String`
 
@@ -51,12 +62,6 @@ Destroy plugin instance.
 ###### rehop
 
 Retrigger hopping for current instance. Useful if hop-from element depends on some external conditions.
-
-#### Events
-
-#### `hop.kist.dochopper`
-
-See [options → hopped](#hopped).
 
 ### Data attributes
 
@@ -115,15 +120,15 @@ $('.hopper-a').dochopper({
 			media: 'screen and (min-width:1200px)'
 		}
 	],
-	hopped: function ( element, media ) {
-		// Hopped!
+	hop: function ( element, media ) {
+		// Hop!
 	}
 });
 
 $('.hopper-b').dochopper();
 
-$('.hopper-a, .hopper-b').on('hop.kist.dochopper', function ( e, element, media ) {
-	// Hopped!
+$('.hopper-a, .hopper-b').on('dochopperhop', function ( e, element, media ) {
+	// Hop!
 });
 ```
 

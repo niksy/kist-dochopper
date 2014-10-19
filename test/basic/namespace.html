@@ -2,18 +2,11 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title>Listener, one condition</title>
+	<title>Namespace</title>
 	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 	<link rel="stylesheet" href="../assets/style/style.css" />
 </head>
 <body>
-
-	<!--[if lt IE 9]>
-		<div class="log">
-			<pre><code class="log-content"></code></pre>
-			<button type="button" class="log-clear">Clear</button>
-		</div>
-	<![endif]-->
 
 	<div class="hopper hopper-01 hopper-root">
 		<b>Original content</b><br />
@@ -36,10 +29,6 @@
 	<script src="../../src/out/kist-dochopper.js"></script>
 	<script>
 
-		$('.log-clear').on('click', function () {
-			$('.log-content').empty();
-		});
-
 		$('.hopper-root').dochopper({
 			conditions: [
 				{
@@ -58,20 +47,8 @@
 					console.log( arguments );
 					console.log('Hop!');
 				}
-			}
-		});
-
-		$('.hopper-root').on('dochopperhop', function ( e, element, media ) {
-			if ( !+'\v1' ) {
-				var data = '';
-				data += JSON.stringify(element, null, '\t');
-				data += JSON.stringify(media, null, '\t');
-				$('.log-content').append('<hr />');
-				$('.log-content').append(data);
-			} else {
-				console.log( arguments );
-				console.log('Hop!');
-			}
+			},
+			namespace: 'foobar'
 		});
 
 	</script>

@@ -310,13 +310,45 @@ var plugin = {
 	},
 	error: function ( message ) {
 		throw new Error(plugin.name + ': ' + message);
+	},
+	constructClasses: function () {
+
+		// Prepare CSS classes
+		this.options.classes = {};
+		this.options.classesNs = {};
+
+		$.each(plugin.classes, $.proxy(function ( name, value ) {
+
+			var ns        = $.trim(this.options.namespace);
+			var pluginNs  = plugin.ns.css;
+			var className = pluginNs + value;
+			var classNameNs = className;
+
+			if ( /^is[A-Z]/.test(name) ) {
+				className = classNameNs = value;
+			} else if ( ns !== pluginNs && ns !== '' ) {
+				classNameNs = ns + value;
+				className = pluginNs + value + ' ' + classNameNs;
+			}
+
+			this.options.classesNs[name] = classNameNs;
+			this.options.classes[name] = className;
+
+		}, this));
+
 	}
 };
 plugin.classes = {
-	item: plugin.ns.css + '-item',
+	item: '-item',
 	isReady: 'is-ready'
 };
 plugin.publicMethods = ['destroy','rehop'];
+plugin.cb = function ( event, data ) {
+	if ( this.options[event] ) {
+		this.options[event].apply(this.element, data);
+	}
+	this.dom.el.trigger((plugin.name + event).toLowerCase(), data);
+};
 
 var dom = {
 	setup: function () {
@@ -335,8 +367,8 @@ var dom = {
 		}, this));
 
 		set
-			.removeClass(plugin.classes.item)
-			.removeClass(plugin.classes.isReady);
+			.removeClass(this.options.classes.item)
+			.removeClass(this.options.classes.isReady);
 
 	}
 };
@@ -477,8 +509,7 @@ function setConditions () {
  * @return {}
  */
 function triggerHop ( args ) {
-	this.options.hopped.apply(this.element, args);
-	this.dom.el.trigger('hop' + this.instance.ens, args);
+	plugin.cb.call(this, 'hop', args);
 }
 
 /**
@@ -522,8 +553,8 @@ function hopOnCondition ( into, initial, condition ) {
 	if ( initial ) {
 		this.queue.push(data);
 		this.dom.el.add(into)
-			.addClass(plugin.classes.item)
-			.addClass(plugin.classes.isReady);
+			.addClass(this.options.classes.item)
+			.addClass(this.options.classes.isReady);
 	}
 
 	if ( !$.isEmptyObject(data) && data.media.matches ) {
@@ -542,6 +573,8 @@ function Dochopper ( element, options ) {
 
 	this.element = element;
 	this.options = $.extend({}, this.defaults, options);
+
+	plugin.constructClasses.call(this);
 
 	this.queueActive = [];
 	this.queue = [];
@@ -611,7 +644,8 @@ $.extend(Dochopper.prototype, {
 	 */
 	defaults: {
 		conditions: [],
-		hopped: function () {}
+		hop: function () {},
+		namespace: plugin.ns.css
 	}
 
 });

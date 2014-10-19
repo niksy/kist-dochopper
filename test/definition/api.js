@@ -23,13 +23,13 @@ $('.hopper').dochopper({
 	condition: function () {
 		return true;
 	},
-	hopped: function ( element, media ) {
+	hop: function ( element, media ) {
 		console.log('Hopped!');
 	}
 });
 
 // Listeners
-$('.hopper').on('hop.kist.dochopper', function ( e, element, media ) {
+$('.hopper').on('dochopperhop', function ( e, element, media ) {
 
 });
 

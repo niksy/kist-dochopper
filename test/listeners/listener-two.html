@@ -51,7 +51,7 @@
 					media: 'screen and (min-width:1200px)'
 				}
 			],
-			hopped: function ( element, media ) {
+			hop: function ( element, media ) {
 				if ( !+'\v1' ) {
 					var data = '';
 					data += JSON.stringify(element, null, '\t');
@@ -60,12 +60,12 @@
 					$('.log-content').append(data);
 				} else {
 					console.log( arguments );
-					console.log('Hopped!');
+					console.log('Hop!');
 				}
 			}
 		});
 
-		$('.hopper-root').on('hop.kist.dochopper', function ( e, element, media ) {
+		$('.hopper-root').on('dochopperhop', function ( e, element, media ) {
 			if ( !+'\v1' ) {
 				var data = '';
 				data += JSON.stringify(element, null, '\t');
@@ -74,7 +74,7 @@
 				$('.log-content').append(data);
 			} else {
 				console.log( arguments );
-				console.log('Hopped!');
+				console.log('Hop!');
 			}
 		});
 
