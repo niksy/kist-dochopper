@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<title>Conditions as options, three conditions, max width</title>
-	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-	<link rel="stylesheet" href="../assets/style/style.css" />
-</head>
-<body>
+{{> top title="Mixed options and DOM data, four conditions, random order"}}
 
 	<!--[if lt IE 9]>
 		<div class="log">
@@ -15,11 +7,11 @@
 		</div>
 	<![endif]-->
 
-	<div class="hopper hopper-01 hopper-root">
+	<div class="hopper hopper-01 hopper-root" data-hop-conditions='[{"into":"hop1","media":"screen and (min-width:1200px)"},{"into":"hop3","media":"screen and (min-width:900px)"}]'>
 		<b>Original content</b><br />
 	</div>
 	<div class="hopper hopper-02" data-hop-from="hop1">
-		<i>New content, max</i><br />
+		<i>New content</i><br />
 	</div>
 	<div class="hopper hopper-03" data-hop-from="hop2">
 		<u>Newer content</u><br />
@@ -27,13 +19,10 @@
 	<div class="hopper hopper-04" data-hop-from="hop3">
 		<b><i>More new content</i></b><br />
 	</div>
-	<div class="hopper hopper-05 hopper-root-01">
+	<div class="hopper hopper-05" data-hop-from="hop4">
 		And again
 	</div>
 
-	<script src="../../bower_components/jquery/dist/jquery.min.js"></script>
-	<!--[if lt IE 9]><script src="../../bower_components/media-match/media.match.min.js"></script><![endif]-->
-	<script src="../../src/out/kist-dochopper.js"></script>
 	<script>
 
 		$('.log-clear').on('click', function () {
@@ -43,16 +32,12 @@
 		$('.hopper-root').dochopper({
 			conditions: [
 				{
-					into: 'hop3',
-					media: 'screen and (min-width:600px)'
-				},
-				{
-					into: 'hop1',
-					media: 'screen and (min-width:800px) and (max-width:999px)'
+					into: 'hop4',
+					media: 'screen and (min-width:1400px)'
 				},
 				{
 					into: 'hop2',
-					media: 'screen and (min-width:1000px)'
+					media: 'screen and (min-width:1300px)'
 				}
 			],
 			hop: function ( element, media ) {
@@ -71,5 +56,4 @@
 
 	</script>
 
-</body>
-</html>
+{{> bottom}}

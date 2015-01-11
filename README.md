@@ -5,12 +5,14 @@ Move elements on page depending on media query.
 ## Installation
 
 ```sh
-bower install niksy/kist-dochopper
+npm install kist-dochopper --save
+
+bower install kist-dochopper --save
 ```
 
 ## API
 
-### `Element.dochopper([options])`
+### `$(Element).dochopper([options])`
 
 Returns: `jQuery`
 
@@ -46,12 +48,19 @@ Array for first and second argument will be returned on plugin initialization. E
 
 Every next condition matching or unmatching will return active jQuery element and media query object.
 
-###### namespace
+###### hopConditionsDataProp
 
-Type: `String`  
-Default: `kist-Dochopper`
+Type: `String`
+Default: `hop-conditions`
 
-Default HTML class namespace.
+`data` property which will be used to for optional setting of conditions (see [options → conditions](#conditions)). If you provide data through this property, value should be valid JSON object.
+
+###### hopFromDataProp
+
+Type: `String`
+Default: `hop-from`
+
+`data` property which will be used as name of the element in which will the content hop to.
 
 ##### Options defined as `String`
 
@@ -62,20 +71,6 @@ Destroy plugin instance.
 ###### rehop
 
 Retrigger hopping for current instance. Useful if hop-from element depends on some external conditions.
-
-### Data attributes
-
-#### `hop-conditions`
-
-Type: `JSON Object`
-
-See [options → conditions](#conditions).
-
-#### `hop-from`
-
-Type: `String`
-
-Name of the element in which will the content hop to.
 
 ## Examples
 
@@ -180,13 +175,3 @@ Tested in IE8+ and all modern browsers.
 ## License
 
 MIT © [Ivan Nikolić](http://ivannikolic.com)
-
-
-
-
-
-
-
-
-
-

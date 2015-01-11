@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<title>Listener, two conditions</title>
-	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-	<link rel="stylesheet" href="../assets/style/style.css" />
-</head>
-<body>
+{{> top title="Conditions as options, three conditions"}}
 
 	<!--[if lt IE 9]>
 		<div class="log">
@@ -31,9 +23,6 @@
 		And again
 	</div>
 
-	<script src="../../bower_components/jquery/dist/jquery.min.js"></script>
-	<!--[if lt IE 9]><script src="../../bower_components/media-match/media.match.min.js"></script><![endif]-->
-	<script src="../../src/out/kist-dochopper.js"></script>
 	<script>
 
 		$('.log-clear').on('click', function () {
@@ -49,6 +38,10 @@
 				{
 					into: 'hop1',
 					media: 'screen and (min-width:1200px)'
+				},
+				{
+					into: 'hop2',
+					media: 'screen and (min-width:1400px)'
 				}
 			],
 			hop: function ( element, media ) {
@@ -65,20 +58,6 @@
 			}
 		});
 
-		$('.hopper-root').on('dochopperhop', function ( e, element, media ) {
-			if ( !+'\v1' ) {
-				var data = '';
-				data += JSON.stringify(element, null, '\t');
-				data += JSON.stringify(media, null, '\t');
-				$('.log-content').append('<hr />');
-				$('.log-content').append(data);
-			} else {
-				console.log( arguments );
-				console.log('Hop!');
-			}
-		});
-
 	</script>
 
-</body>
-</html>
+{{> bottom}}

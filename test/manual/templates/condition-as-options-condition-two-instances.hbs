@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<title>Conditions as options, two instances</title>
-	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-	<link rel="stylesheet" href="../assets/style/style.css" />
-</head>
-<body>
+{{> top title="Conditions as options, two instances"}}
 
 	<!--[if lt IE 9]>
 		<div class="log">
@@ -38,9 +30,6 @@
 		And again
 	</div>
 
-	<script src="../../bower_components/jquery/dist/jquery.min.js"></script>
-	<!--[if lt IE 9]><script src="../../bower_components/media-match/media.match.min.js"></script><![endif]-->
-	<script src="../../src/out/kist-dochopper.js"></script>
 	<script>
 
 		$('.log-clear').on('click', function () {
@@ -91,5 +80,4 @@
 
 	</script>
 
-</body>
-</html>
+{{> bottom}}

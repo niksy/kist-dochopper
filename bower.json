@@ -3,10 +3,10 @@
   "version": "0.2.6",
   "description": "Move elements on page depending on media query.",
   "authors": [
-    "Ivan Nikolić"
+    "Ivan Nikolić <niksy5@gmail.com> (http://ivannikolic.com/)"
   ],
   "license": "MIT",
-  "main": "dist/kist-dochopper.min.js",
+  "main": "dist/kist-dochopper.js",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -14,11 +14,12 @@
     "test",
     "tests",
     "src",
+    "lib",
     "Gruntfile.js",
     "package.json"
   ],
   "dependencies": {
-    "jquery": ">=1",
+    "jquery": "~1.11.2",
     "matchmedia": "~0.1.0",
     "media-match": "niksy/media-match#~2.0.3"
   },
@@ -27,7 +28,10 @@
   },
   "homepage": "https://github.com/niksy/kist-dochopper",
   "keywords": [
+    "kist",
+    "dochopper",
     "mq",
-    "jump"
+    "jump",
+    "browserify"
   ]
 }

@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<title>DOM data, three conditions</title>
-	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-	<link rel="stylesheet" href="../assets/style/style.css" />
-</head>
-<body>
+{{> top title="Conditions as options, two conditions"}}
+
+	<div class="controls">
+		<button type="button" class="destroy">Destroy instance ".hopper-root"</button>
+	</div>
 
 	<!--[if lt IE 9]>
 		<div class="log">
@@ -15,7 +11,7 @@
 		</div>
 	<![endif]-->
 
-	<div class="hopper hopper-01 hopper-root" data-hop-conditions='[{"into":"hop3","media":"screen and (min-width:900px)"},{"into":"hop1","media":"screen and (min-width:1200px)"},{"into":"hop2","media":"screen and (min-width:1400px)"}]'>
+	<div class="hopper hopper-01 hopper-root">
 		<b>Original content</b><br />
 	</div>
 	<div class="hopper hopper-02" data-hop-from="hop1">
@@ -31,16 +27,27 @@
 		And again
 	</div>
 
-	<script src="../../bower_components/jquery/dist/jquery.min.js"></script>
-	<!--[if lt IE 9]><script src="../../bower_components/media-match/media.match.min.js"></script><![endif]-->
-	<script src="../../src/out/kist-dochopper.js"></script>
 	<script>
+
+		$('.destroy').on('click', function () {
+			$('.hopper-root').dochopper('destroy');
+		});
 
 		$('.log-clear').on('click', function () {
 			$('.log-content').empty();
 		});
 
 		$('.hopper-root').dochopper({
+			conditions: [
+				{
+					into: 'hop3',
+					media: 'screen and (min-width:900px)'
+				},
+				{
+					into: 'hop1',
+					media: 'screen and (min-width:1200px)'
+				}
+			],
 			hop: function ( element, media ) {
 				if ( !+'\v1' ) {
 					var data = '';
@@ -57,5 +64,4 @@
 
 	</script>
 
-</body>
-</html>
+{{> bottom}}

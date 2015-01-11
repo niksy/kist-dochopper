@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<title>DOM data, two conditions</title>
-	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-	<link rel="stylesheet" href="../assets/style/style.css" />
-</head>
-<body>
+{{> top title="Mixed options and DOM data, four conditions"}}
 
 	<!--[if lt IE 9]>
 		<div class="log">
@@ -27,13 +19,10 @@
 	<div class="hopper hopper-04" data-hop-from="hop3">
 		<b><i>More new content</i></b><br />
 	</div>
-	<div class="hopper hopper-05 hopper-root-01">
+	<div class="hopper hopper-05" data-hop-from="hop4">
 		And again
 	</div>
 
-	<script src="../../bower_components/jquery/dist/jquery.min.js"></script>
-	<!--[if lt IE 9]><script src="../../bower_components/media-match/media.match.min.js"></script><![endif]-->
-	<script src="../../src/out/kist-dochopper.js"></script>
 	<script>
 
 		$('.log-clear').on('click', function () {
@@ -41,6 +30,16 @@
 		});
 
 		$('.hopper-root').dochopper({
+			conditions: [
+				{
+					into: 'hop2',
+					media: 'screen and (min-width:1300px)'
+				},
+				{
+					into: 'hop4',
+					media: 'screen and (min-width:1400px)'
+				}
+			],
 			hop: function ( element, media ) {
 				if ( !+'\v1' ) {
 					var data = '';
@@ -57,5 +56,4 @@
 
 	</script>
 
-</body>
-</html>
+{{> bottom}}

@@ -2,39 +2,58 @@
   "name": "kist-dochopper",
   "version": "0.2.6",
   "description": "Move elements on page depending on media query.",
-  "author": "Ivan Nikolić",
+  "author": "Ivan Nikolić <niksy5@gmail.com> (http://ivannikolic.com/)",
   "license": "MIT",
-  "main": "Gruntfile.js",
+  "main": "lib/index.js",
   "directories": {
     "test": "test"
   },
-  "devDependencies": {
-    "browserify": "^4.1.11",
-    "browserify-shim": "^3.6.0",
-    "grunt": "^0.4.5",
-    "grunt-browserify": "^2.1.0",
-    "grunt-bump": "^0.0.13",
-    "grunt-contrib-concat": "^0.4.0",
-    "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-uglify": "^0.4.0",
-    "grunt-jscs": "^0.6.1",
-    "sort-media-queries": "git://github.com/niksy/sort-media-queries.git"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "jquery": "^1.11.2",
+    "kist-toolbox": "^0.3.5",
+    "toarray": "0.0.1",
+    "sort-media-queries": "^0.2.1"
+  },
+  "devDependencies": {
+    "browserify-shim": "^3.8.0",
+    "bundle-collapser": "^1.1.0",
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^3.2.0",
+    "grunt-bump": "^0.0.13",
+    "grunt-compile-handlebars": "^1.0.0",
+    "grunt-concurrent": "^1.0.0",
+    "grunt-contrib-concat": "^0.4.0",
+    "grunt-contrib-connect": "^0.9.0",
+    "grunt-contrib-copy": "^0.7.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.7.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-jscs": "^1.1.0",
+    "load-grunt-tasks": "^0.6.0"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/niksy/kist-dochopper.git"
   },
   "keywords": [
+    "kist",
+    "dochopper",
     "mq",
-    "jump"
+    "jump",
+    "browserify"
   ],
   "bugs": {
     "url": "https://github.com/niksy/kist-dochopper/issues"
   },
   "homepage": "https://github.com/niksy/kist-dochopper",
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
   "browserify-shim": {
     "jquery": "global:$"
   }

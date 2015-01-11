@@ -15,7 +15,7 @@ module.exports = function ( grunt ) {
 					banner: '<%= meta.banner %>'
 				},
 				files: {
-					'dist/kist-dochopper.js': ['src/out/kist-dochopper.js']
+					'dist/<%= pkg.name %>.js': ['compiled/<%= pkg.main %>']
 				}
 			}
 		},
@@ -26,7 +26,7 @@ module.exports = function ( grunt ) {
 					banner: '<%= meta.banner %>'
 				},
 				files: {
-					'dist/kist-dochopper.min.js': ['src/out/kist-dochopper.js']
+					'dist/<%= pkg.name %>.min.js': ['compiled/<%= pkg.main %>']
 				}
 			}
 		},
@@ -52,8 +52,8 @@ module.exports = function ( grunt ) {
 				},
 				files: {
 					src: [
-						'src/**/*.js',
-						'!src/out/**/*.js'
+						'<%= pkg.main %>',
+						'lib/**/*.js'
 					]
 				}
 			}
@@ -65,44 +65,96 @@ module.exports = function ( grunt ) {
 					jshintrc: '.jshintrc'
 				},
 				src: [
-					'src/**/*.js',
-					'!src/out/**/*.js'
+					'<%= pkg.main %>',
+					'lib/**/*.js'
 				]
 			}
 		},
 
 		browserify: {
 			options: {
-				transform: ['browserify-shim']
+				browserifyOptions: {
+					standalone: 'jQuery.fn.dochopper'
+				}
 			},
-			dist: {
-				files: {
-					'src/out/kist-dochopper.js': ['src/kist-dochopper.js']
-				},
-			},
-			watch: {
-				files: {
-					'src/out/kist-dochopper.js': ['src/kist-dochopper.js']
-				},
+			standalone: {
 				options: {
-					watch: true,
-					keepAlive: true
+					plugin: ['bundle-collapser/plugin']
+				},
+				files: {
+					'compiled/<%= pkg.main %>': ['<%= pkg.main %>']
 				}
 			}
-		}
+		},
+
+		connect: {
+			test:{
+				options: {
+					open:true
+				}
+			}
+		},
+
+		'compile-handlebars': {
+			test: {
+				templateData: {
+					bower: '../../../bower_components',
+					compiled: '../../../compiled',
+					assets: 'assets',
+					main: '<%= pkg.main %>'
+				},
+				partials: 'test/manual/templates/partials/**/*.hbs',
+				template: 'test/manual/templates/*.hbs',
+				output: 'compiled/test/manual/*.html'
+			}
+		},
+
+		copy: {
+			test: {
+				files:[{
+					expand: true,
+					cwd: 'test/manual/assets/',
+					src: ['**'],
+					dest: 'compiled/test/manual/assets/'
+				}]
+			}
+		},
+
+		concurrent: {
+			options: {
+				logConcurrentOutput: true
+			},
+			test: ['watch','connect:test:keepalive']
+		},
+
+		watch: {
+			options: {
+				spawn: false
+			},
+			hbs: {
+				files: 'test/manual/**/*.hbs',
+				tasks: ['compile-handlebars:test']
+			},
+			browserify: {
+				files: ['<%= pkg.main %>', 'lib/**/*.js'],
+				tasks: ['browserify:standalone']
+			}
+		},
 
 	});
 
-	grunt.loadNpmTasks('grunt-contrib-jshint');
-	grunt.loadNpmTasks('grunt-jscs');
-	grunt.loadNpmTasks('grunt-contrib-concat');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-bump');
-	grunt.loadNpmTasks('grunt-browserify');
+	require('load-grunt-tasks')(grunt);
+
+	grunt.registerTask('test', function () {
+		var tasks = ['compile-handlebars:test','copy:test','browserify:standalone'];
+		if ( grunt.option('watch') ) {
+			tasks.push('concurrent:test');
+		}
+		grunt.task.run(tasks);
+	});
 
 	grunt.registerTask('stylecheck', ['jshint:main', 'jscs:main']);
-	grunt.registerTask('default', ['stylecheck', 'browserify:dist', 'concat:dist', 'uglify:dist']);
-	grunt.registerTask('watch', ['browserify:watch']);
+	grunt.registerTask('default', ['stylecheck', 'browserify:standalone', 'concat', 'uglify']);
 	grunt.registerTask('releasePatch', ['bump-only:patch', 'default', 'bump-commit']);
 	grunt.registerTask('releaseMinor', ['bump-only:minor', 'default', 'bump-commit']);
 	grunt.registerTask('releaseMajor', ['bump-only:major', 'default', 'bump-commit']);

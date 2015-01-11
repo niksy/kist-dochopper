@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<title>Conditions as options, three instances</title>
-	<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-	<link rel="stylesheet" href="../assets/style/style.css" />
-</head>
-<body>
+{{> top title="Dynamic elements, three instances"}}
 
 	<div class="controls">
 		<button type="button" class="destroy" data-instance=".hopper-a">Destroy instance ".hopper-a"</button><br />
@@ -26,7 +18,7 @@
 			Div content
 			<div>Inner div content</div>
 		</div>
-		<b>Original content</b><br />
+		<b><span class="dynamic1">Original content</span></b><br />
 	</div>
 	<div class="hopper hopper-02" data-hop-from="hop1">
 		<i>New content</i><br />
@@ -37,7 +29,7 @@
 	<div class="hopper hopper-04 hopper-b">
 		<b><i>More new content</i></b><br />
 		<div data-hop-from="hop3">
-			<div>More content for first content</div>
+			<div><button type="button" class="dynamic2">More content for first content</button></div>
 		</div>
 	</div>
 	<div class="hopper hopper-05 hopper-c">
@@ -46,17 +38,44 @@
 		</div>
 	</div>
 
-	<script src="../../bower_components/jquery/dist/jquery.min.js"></script>
-	<!--[if lt IE 9]><script src="../../bower_components/media-match/media.match.min.js"></script><![endif]-->
-	<script src="../../src/out/kist-dochopper.js"></script>
 	<script>
-
-		$('.destroy').on('click', function () {
-			$($(this).data('instance')).dochopper('destroy');
-		});
 
 		$('.log-clear').on('click', function () {
 			$('.log-content').empty();
+		});
+
+		$('.hopper-a').on('click', '.dynamic1', function () {
+			if ( !+'\v1' ) {
+				var data = 'dynamic1 clicked, delegeated';
+				$('.log-content').append('<hr />');
+				$('.log-content').append(data);
+			} else {
+				console.log( 'dynamic1 clicked, delegeated' );
+			}
+		});
+
+		$('.dynamic1').on('click', function () {
+			if ( !+'\v1' ) {
+				var data = 'dynamic1 clicked';
+				$('.log-content').append('<hr />');
+				$('.log-content').append(data);
+			} else {
+				console.log( 'dynamic1 clicked' );
+			}
+		});
+
+		$('.dynamic2').on('click', function () {
+			if ( !+'\v1' ) {
+				var data = 'dynamic2 clicked';
+				$('.log-content').append('<hr />');
+				$('.log-content').append(data);
+			} else {
+				console.log( 'dynamic2 clicked' );
+			}
+		});
+
+		$('.destroy').on('click', function () {
+			$($(this).data('instance')).dochopper('destroy');
 		});
 
 		$('.hopper-a').dochopper({
@@ -128,5 +147,4 @@
 
 	</script>
 
-</body>
-</html>
+{{> bottom}}
