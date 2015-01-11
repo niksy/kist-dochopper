@@ -55,14 +55,14 @@ Every next condition matching or unmatching will return active jQuery element an
 
 ###### hopConditionsDataProp
 
-Type: `String`
+Type: `String`  
 Default: `hop-conditions`
 
 `data` property which will be used to for optional setting of conditions (see [options → conditions](#conditions)). If you provide data through this property, value should be valid JSON object.
 
 ###### hopFromDataProp
 
-Type: `String`
+Type: `String`  
 Default: `hop-from`
 
 `data` property which will be used as name of the element in which will the content hop to.
