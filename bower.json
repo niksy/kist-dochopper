@@ -1,6 +1,6 @@
 {
   "name": "kist-dochopper",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Move elements on page depending on media query.",
   "authors": [
     "Ivan Nikolić <niksy5@gmail.com> (http://ivannikolic.com/)"
