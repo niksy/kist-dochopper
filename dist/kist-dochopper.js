@@ -1,22 +1,407 @@
-/*! kist-dochopper 0.2.6 - Move elements on page depending on media query. | Author: Ivan Nikolić, 2014 | License: MIT */
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*! kist-dochopper 0.3.0 - Move elements on page depending on media query. | Author: Ivan Nikolić <niksy5@gmail.com> (http://ivannikolic.com/), 2015 | License: MIT */
+!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self);var n=f;n=n.jQuery||(n.jQuery={}),n=n.fn||(n.fn={}),n.dochopper=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (global){
+var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
+var smq = require(10);
+var toarray = require(12);
+var dom = require(2);
+var events = require(3);
+var instance = require(6);
+var meta = require(7);
+var hopOnCondition = require(4);
+var emit = require(8)(meta.name);
+var jQuery = $;
 
-module.exports = function extend (object) {
-    // Takes an unlimited number of extenders.
-    var args = Array.prototype.slice.call(arguments, 1);
+/**
+ * @this {Dochopper}
+ *
+ * @param  {String|Function|jQuery} into
+ *
+ * @return {jQuery}
+ */
+function getIntoElement ( into ) {
 
-    // For each extender, copy their properties on our object.
-    for (var i = 0, source; source = args[i]; i++) {
-        if (!source) continue;
-        for (var property in source) {
-            object[property] = source[property];
-        }
-    }
+	var el;
 
-    return object;
-};
+	if ( typeof(into) === 'function' ) {
+		into = into.call(this.element);
+	}
+
+	if ( typeof(into) === 'string' ) {
+		el = '[data-' + this.options.hopFromDataProp + '="' + into + '"]';
+	}
+	if ( into instanceof jQuery ) {
+		el = into;
+	}
+
+	return $(el);
+}
+
+/**
+ * Get conditions from DOM attribute
+ *
+ * @return {Array}
+ */
+function getDomConditions () {
+	var data = this.$el.data(this.options.hopConditionsDataProp);
+	return data ? toarray(data) : [];
+}
+
+function setConditions () {
+
+	this.conditions = this.conditions || [];
+	this.conditions = this.conditions.concat(getDomConditions.call(this), toarray(this.options.conditions));
+
+	this.conditions = smq(this.conditions, 'media');
+
+	$.each(this.conditions, $.proxy(function ( index, condition ) {
+
+		condition.get          = {};
+		condition.get.media    = window.matchMedia(condition.media);
+		condition.get.into     = getIntoElement.call(this, condition.into);
+		condition.get.listener = $.proxy(hopOnCondition, this, condition.get.into, false);
+
+	}, this));
+
+}
+
+/**
+ * @class
+ *
+ * @param {Element} element
+ * @param {Object} options
+ */
+function Dochopper ( element, options ) {
+
+	this.element = element;
+	this.options = $.extend(true, {}, this.defaults, options);
+
+	this.queueActive = [];
+	this.queue = [];
+
+	instance.setup.call(this);
+	dom.setup.call(this);
+
+	setConditions.call(this);
+
+	events.setupInitial.call(this);
+	events.setupListeners.call(this);
+
+}
+
+$.extend(Dochopper.prototype, {
+
+	/**
+	 * @param  {jQuery} into
+	 * @param  {Object} media
+	 *
+	 * @return {}
+	 */
+	hop: function ( into, media ) {
+		this.$content.detach().appendTo(into);
+		if ( !this.queue.length ) {
+			emit(this, 'hop', [into, media]);
+		}
+	},
+
+	destroy: function () {
+		dom.destroy.call(this);
+		events.destroy.call(this);
+		instance.destroy.call(this);
+	},
+
+	rehop: function () {
+
+		var set = [];
+
+		$.each(this.conditions, $.proxy(function ( index, condition ) {
+			if ( condition.get.media.matches ) {
+
+				var el = getIntoElement.call(this, condition.into);
+
+				// Do this only if new element is not the same as the first cached element
+				if ( !condition.get.into.is(el) ) {
+					condition.get.into = el;
+					condition.get.media.removeListener(condition.get.listener);
+					condition.get.listener = $.proxy(hopOnCondition, this, condition.get.into, false);
+					condition.get.media.addListener(condition.get.listener);
+					set.push([condition.get.into, condition.get.media]);
+				}
+			}
+
+		}, this));
+
+		if ( set.length ) {
+			this.hop.apply(this, set[set.length - 1]);
+		}
+
+	},
+
+	defaults: {
+		conditions: [],
+		hop: $.noop,
+		hopFromDataProp: 'hop-from',
+		hopConditionsDataProp: 'hop-conditions',
+		classes: {
+			item: meta.ns.htmlClass + '-item',
+			isReady: meta.ns.htmlClass + 'is-ready'
+		}
+	}
+
+});
+
+module.exports = Dochopper;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],2:[function(require,module,exports){
-var extend = require('s-extend');
+(function (global){
+var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
+
+module.exports = {
+	setup: function () {
+		this.$el = $(this.element);
+		this.$content = this.$el.contents();
+	},
+	destroy: function () {
+
+		var set = $();
+
+		set = set.add(this.$el);
+
+		$.each(this.conditions, function ( index, condition ) {
+			set = set.add(condition.get.into);
+		});
+
+		set.removeClass([this.options.classes.item, this.options.classes.isReady].join(' '));
+
+	}
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],3:[function(require,module,exports){
+(function (global){
+var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
+var meta = require(7);
+var hopOnCondition = require(4);
+var emit = require(8)(meta.name);
+
+module.exports = {
+	setupInitial: function () {
+
+		this.$el.one('init' + this.ens, $.proxy(function ( e, queue ) {
+
+			var element = $();
+			var media = [];
+			var count = 0;
+
+			$.each(queue, function ( index, item ) {
+				if ( $.isEmptyObject(item) ) {
+					count++;
+					return;
+				}
+				element = element.add(item.into);
+				media.push(item.media);
+			});
+
+			// Trigger hop only if we have at least one condition active
+			if ( count !== queue.length ) {
+				emit(this, 'hop', [element, media]);
+			}
+
+			while ( queue.length > 0 ) {
+				queue.pop();
+			}
+
+		}, this));
+
+	},
+	setupListeners: function () {
+
+		$.each(this.conditions, $.proxy(function ( index, condition ) {
+			condition.get.media.addListener(condition.get.listener);
+			hopOnCondition.call(this, condition.get.into, true, condition.get.media);
+		}, this));
+
+		this.$el.trigger('init' + this.ens, [this.queue]);
+
+	},
+	destroy: function () {
+
+		$.each(this.conditions, function ( index, condition ) {
+			condition.get.media.removeListener(condition.get.listener);
+		});
+
+	}
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],4:[function(require,module,exports){
+(function (global){
+var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
+
+/**
+ * @param  {jQuery} into
+ * @param  {Boolean} initial
+ * @param  {Object} condition
+ */
+var hopOnCondition = module.exports = function ( into, initial, condition ) {
+
+	var data = {};
+
+	if ( condition.matches ) {
+		data = {
+			media: condition,
+			into: into
+		};
+		this.queueActive.push(data);
+	} else {
+		if ( !initial ) {
+			this.queueActive.pop();
+			if ( this.queueActive.length === 0 ) {
+				data = {
+					media: {
+						matches: true,
+						media: 'root'
+					},
+					into: this.$el
+				};
+			} else {
+				data = this.queueActive[this.queueActive.length - 1];
+			}
+		}
+	}
+
+	/**
+	 * Set flag when flowing elements are ready.
+	 * This is so we can avoid FOUC on contexts where content has to flow.
+	 */
+	if ( initial ) {
+		this.queue.push(data);
+		this.$el.add(into)
+			.addClass([this.options.classes.item, this.options.classes.isReady].join(' '));
+	}
+
+	if ( !$.isEmptyObject(data) && data.media.matches ) {
+		this.hop(data.into, data.media);
+	}
+
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],5:[function(require,module,exports){
+(function (global){
+var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
+var Ctor = require(1);
+var meta = require(7);
+var isPublicMethod = require(9)(meta.publicMethods);
+
+/**
+ * @param  {Object|String} options
+ *
+ * @return {jQuery}
+ */
+var plugin = module.exports = function ( options ) {
+
+	options = options || {};
+
+	return this.each(function () {
+
+		var instance = $.data(this, meta.name);
+
+		if ( isPublicMethod(options) && instance ) {
+			instance[options]();
+		} else if ( $.type(options) === 'object' && !instance ) {
+			$.data(this, meta.name, new Ctor(this, options));
+		}
+
+	});
+
+};
+plugin.defaults = Ctor.prototype.defaults;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],6:[function(require,module,exports){
+(function (global){
+var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
+var meta = require(7);
+var instance = 0;
+
+module.exports = {
+	setup: function () {
+		this.uid = instance++;
+		this.ens = meta.ns.event + '.' + this.uid;
+	},
+	destroy: function () {
+		$.removeData(this.element, meta.name);
+	}
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],7:[function(require,module,exports){
+module.exports = {
+	name: 'dochopper',
+	ns: {
+		htmlClass: 'kist-Dochopper',
+		event: '.kist.dochopper'
+	},
+	publicMethods: ['destroy','rehop']
+};
+
+},{}],8:[function(require,module,exports){
+(function (global){
+/* jshint maxparams:false */
+
+var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
+
+/**
+ * @param  {String} name
+ *
+ * @return {Function}
+ */
+module.exports = function ( name ) {
+
+	/**
+	 * @param  {Object}   ctx
+	 * @param  {String}   eventName
+	 * @param  {Array}    data
+	 * @param  {jQuery}   triggerEl
+	 */
+	return function ( ctx, eventName, data, triggerEl ) {
+		var el = (ctx.dom && ctx.dom.el) || ctx.$el || $({});
+		if ( ctx.options[eventName] ) {
+			ctx.options[eventName].apply((el.length === 1 ? el[0] : el.toArray()), data);
+		}
+		(triggerEl || el).trigger(((name || '') + eventName).toLowerCase(), data);
+	};
+
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],9:[function(require,module,exports){
+(function (global){
+var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
+
+/**
+ * @param  {Array} methods
+ *
+ * @return {Function}
+ */
+module.exports = function ( methods ) {
+
+	/**
+	 * @param  {String} name
+	 *
+	 * @return {Boolean}
+	 */
+	return function ( name ) {
+		return typeof(name) === 'string' && $.inArray(name, methods || []) !== -1;
+	};
+
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],10:[function(require,module,exports){
+var extend = require(11);
 var mqTypes = ['blank','all','minWidth','minHeight','maxWidth','maxHeight','print'];
 
 /**
@@ -73,7 +458,9 @@ function prepareRules ( rules, type, prop ) {
 	var o = {};
 	for ( var i = 0, rulesLength = rules.length; i < rulesLength; i++ ) {
 		if ( type === 'string' ) {
-			o = extend({}, { __media: rules[i] });
+			o = extend({}, {
+				__media: rules[i]
+			});
 		} else {
 			o = extend({}, rules[i]);
 			o.__media = rules[i][prop];
@@ -251,428 +638,45 @@ function sortInit ( rules, type, prop ) {
 	return transformCollection(collection, type, prop);
 }
 
-var api = {
-
-	/**
-	 * @param  {Array} rules
-	 *
-	 * @return {Array}
-	 */
-	sort: function ( rules ) {
-		if ( rules ) {
-			return this[typeof(rules[0]) === 'string' ? 'sortString' : 'sortObject'].apply(this, arguments);
+/**
+ * @param  {Array} rules
+ * @param  {String} prop
+ *
+ * @return {Array}
+ */
+module.exports = function ( rules, prop ) {
+	if ( rules ) {
+		if ( prop ) {
+			return sortInit(rules, 'object', prop);
 		}
-		return [];
-	},
-
-	/**
-	 * @param  {Array} rules
-	 *
-	 * @return {Array}
-	 */
-	sortString: function ( rules ) {
 		return sortInit(rules, 'string');
-	},
-
-	/**
-	 * @param  {Array} rules
-	 * @param  {String} prop
-	 *
-	 * @return {Array}
-	 */
-	sortObject: function ( rules, prop ) {
-		return sortInit(rules, 'object', prop);
 	}
-
+	return [];
 };
 
-module.exports = api;
+},{}],11:[function(require,module,exports){
+module.exports = extend
 
-},{"s-extend":1}],3:[function(require,module,exports){
-var dochopper = require('./lib/dochopper');
+function extend() {
+    var target = {}
 
-$.kist = $.kist || {};
-$.fn[dochopper.name] = dochopper.fn;
+    for (var i = 0; i < arguments.length; i++) {
+        var source = arguments[i]
 
-},{"./lib/dochopper":4}],4:[function(require,module,exports){
-(function (global){
-/* jshint latedef:nofunc */
+        for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+                target[key] = source[key]
+            }
+        }
+    }
 
-var $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null);
-var smq = require('sort-media-queries');
-
-var plugin = {
-	name: 'dochopper',
-	ns: {
-		css: 'kist-Dochopper',
-		event: '.kist.dochopper',
-		dom: 'kist-dochopper'
-	},
-	error: function ( message ) {
-		throw new Error(plugin.name + ': ' + message);
-	},
-	constructClasses: function () {
-
-		// Prepare CSS classes
-		this.options.classes = {};
-		this.options.classesNs = {};
-
-		$.each(plugin.classes, $.proxy(function ( name, value ) {
-
-			var ns        = $.trim(this.options.namespace);
-			var pluginNs  = plugin.ns.css;
-			var className = pluginNs + value;
-			var classNameNs = className;
-
-			if ( /^is[A-Z]/.test(name) ) {
-				className = classNameNs = value;
-			} else if ( ns !== pluginNs && ns !== '' ) {
-				classNameNs = ns + value;
-				className = pluginNs + value + ' ' + classNameNs;
-			}
-
-			this.options.classesNs[name] = classNameNs;
-			this.options.classes[name] = className;
-
-		}, this));
-
-	}
-};
-plugin.classes = {
-	item: '-item',
-	isReady: 'is-ready'
-};
-plugin.publicMethods = ['destroy','rehop'];
-plugin.cb = function ( event, data ) {
-	if ( this.options[event] ) {
-		this.options[event].apply(this.element, data);
-	}
-	this.dom.el.trigger((plugin.name + event).toLowerCase(), data);
-};
-
-var dom = {
-	setup: function () {
-		this.dom         = this.dom || {};
-		this.dom.el      = $(this.element);
-		this.dom.content = this.dom.el.contents();
-	},
-	destroy: function () {
-
-		var set = $();
-
-		set = set.add(this.dom.el);
-
-		$.each(this.conditions, $.proxy(function ( index, condition ) {
-			set = set.add(condition.get.into);
-		}, this));
-
-		set
-			.removeClass(this.options.classes.item)
-			.removeClass(this.options.classes.isReady);
-
-	}
-};
-
-var events = {
-	setupInitial: function () {
-
-		this.dom.el.one('init' + this.instance.ens, $.proxy(function ( e, queue ) {
-
-			var element = $();
-			var media = [];
-			var count = 0;
-
-			$.each(queue, function ( index, item ) {
-				if ( $.isEmptyObject(item) ) {
-					count++;
-					return;
-				}
-				element = element.add(item.into);
-				media.push(item.media);
-			});
-
-			// Trigger hop only if we have at least one condition active
-			if ( count !== queue.length ) {
-				triggerHop.call(this, [element, media]);
-			}
-
-			while ( queue.length > 0 ) {
-				queue.pop();
-			}
-
-		}, this));
-
-	},
-	setupListeners: function () {
-
-		$.each(this.conditions, $.proxy(function ( index, condition ) {
-			condition.get.media.addListener(condition.get.listener);
-			hopOnCondition.call(this, condition.get.into, true, condition.get.media);
-		}, this));
-
-		this.dom.el.trigger('init' + this.instance.ens, [this.queue]);
-
-	},
-	destroy: function () {
-
-		$.each(this.conditions, $.proxy(function ( index, condition ) {
-			condition.get.media.removeListener(condition.get.listener);
-		}, this));
-
-	}
-};
-
-var instance = {
-	id: 0,
-	setup: function () {
-		this.instance     = this.instance || {};
-		this.instance.id  = instance.id++;
-		this.instance.ens = plugin.ns.event; // + '.' + this.instance.id;
-	},
-	destroy: function () {
-		delete $.data(this.element)[plugin.name];
-	}
-};
-
-/**
- * @this {Dochopper}
- *
- * @param  {String|Function|jQuery} into
- *
- * @return {jQuery}
- */
-function getIntoElement ( into ) {
-
-	var el;
-
-	if ( typeof(into) === 'function' ) {
-		into = into.call(this.element);
-	}
-
-	if ( typeof(into) === 'string' ) {
-		el = '[data-hop-from="' + into + '"]';
-	}
-	if ( into instanceof jQuery ) {
-		el = into;
-	}
-
-	return $(el);
+    return target
 }
 
-/**
- * Wrap non-array conditions to array of conditions
- *
- * @param  {*} conditions
- *
- * @return {Array}
- */
-function wrapConditions ( conditions ) {
-	if ( $.type(conditions) === 'array' ) {
-		return conditions;
-	}
-	return [conditions];
+},{}],12:[function(require,module,exports){
+module.exports = function(item) {
+  if(item === undefined)  return [];
+  return Object.prototype.toString.call(item) === "[object Array]" ? item : [item];
 }
-
-/**
- * Get conditions from DOM attribute
- *
- * @return {Array}
- */
-function getDomConditions () {
-	var data = this.dom.el.data('hop-conditions');
-	return data ? wrapConditions(data) : [];
-}
-
-function setConditions () {
-
-	this.conditions = this.conditions || [];
-	this.conditions = this.conditions.concat(getDomConditions.call(this), wrapConditions(this.options.conditions));
-
-	this.conditions = smq.sortObject(this.conditions, 'media');
-
-	$.each(this.conditions, $.proxy(function ( index, condition ) {
-
-		condition.get          = {};
-		condition.get.media    = window.matchMedia(condition.media);
-		condition.get.into     = getIntoElement.call(this, condition.into);
-		condition.get.listener = $.proxy(hopOnCondition, this, condition.get.into, false);
-
-	}, this));
-
-}
-
-/**
- * @this {Dochopper}
- *
- * @param  {Array} args
- *
- * @return {}
- */
-function triggerHop ( args ) {
-	plugin.cb.call(this, 'hop', args);
-}
-
-/**
- * @param  {jQuery} into
- * @param  {Boolean} initial
- * @param  {Object} condition
- *
- * @return {}
- */
-function hopOnCondition ( into, initial, condition ) {
-
-	var data = {};
-
-	if ( condition.matches ) {
-		data = {
-			media: condition,
-			into: into
-		};
-		this.queueActive.push(data);
-	} else {
-		if ( !initial ) {
-			this.queueActive.pop();
-			if ( this.queueActive.length === 0 ) {
-				data = {
-					media: {
-						matches: true,
-						media: 'root'
-					},
-					into: this.dom.el
-				};
-			} else {
-				data = this.queueActive[this.queueActive.length - 1];
-			}
-		}
-	}
-
-	/**
-	 * Set flag when flowing elements are ready.
-	 * This is so we can avoid FOUC on contexts where content has to flow.
-	 */
-	if ( initial ) {
-		this.queue.push(data);
-		this.dom.el.add(into)
-			.addClass(this.options.classes.item)
-			.addClass(this.options.classes.isReady);
-	}
-
-	if ( !$.isEmptyObject(data) && data.media.matches ) {
-		this.hop(data.into, data.media);
-	}
-
-}
-
-/**
- * @class
- *
- * @param {Element} element
- * @param {Object} options
- */
-function Dochopper ( element, options ) {
-
-	this.element = element;
-	this.options = $.extend({}, this.defaults, options);
-
-	plugin.constructClasses.call(this);
-
-	this.queueActive = [];
-	this.queue = [];
-
-	instance.setup.call(this);
-	dom.setup.call(this);
-
-	setConditions.call(this);
-
-	events.setupInitial.call(this);
-	events.setupListeners.call(this);
-
-}
-
-$.extend(Dochopper.prototype, {
-
-	/**
-	 * @param  {jQuery} into
-	 * @param  {Object} media
-	 *
-	 * @return {}
-	 */
-	hop: function ( into, media ) {
-		this.dom.content.detach().appendTo(into);
-		if ( !this.queue.length ) {
-			triggerHop.call(this, [into, media]);
-		}
-	},
-
-	destroy: function () {
-		dom.destroy.call(this);
-		events.destroy.call(this);
-		instance.destroy.call(this);
-	},
-
-	rehop: function () {
-
-		var set = [];
-
-		$.each(this.conditions, $.proxy(function ( index, condition ) {
-			if ( condition.get.media.matches ) {
-
-				var el = getIntoElement.call(this, condition.into);
-
-				// Do this only if new element is not the same as the first cached element
-				if ( !condition.get.into.is(el) ) {
-					condition.get.into = el;
-					condition.get.media.removeListener(condition.get.listener);
-					condition.get.listener = $.proxy(hopOnCondition, this, condition.get.into, false);
-					condition.get.media.addListener(condition.get.listener);
-					set.push([condition.get.into, condition.get.media]);
-				}
-			}
-
-		}, this));
-
-		if ( set.length ) {
-			this.hop.apply(this, set[set.length - 1]);
-		}
-
-	},
-
-	/**
-	 * Default options
-	 *
-	 * @type {Object}
-	 */
-	defaults: {
-		conditions: [],
-		hop: function () {},
-		namespace: plugin.ns.css
-	}
-
+},{}]},{},[5])(5)
 });
-
-var fn = function ( options ) {
-
-	if ( typeof(options) === 'string' && $.inArray(options, plugin.publicMethods) !== -1 ) {
-		return this.each(function () {
-			var pluginInstance = $.data(this, plugin.name);
-			if ( pluginInstance ) {
-				pluginInstance[options]();
-			}
-		});
-	}
-
-	return this.each(function () {
-		if ( !$.data(this, plugin.name) ) {
-			$.data(this, plugin.name, new Dochopper(this, options));
-		}
-	});
-
-};
-
-module.exports = {
-	name: plugin.name,
-	fn: fn
-};
-
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"sort-media-queries":2}]},{},[3]);
