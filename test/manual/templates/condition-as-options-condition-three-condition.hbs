@@ -49,7 +49,11 @@
 					media: 'screen and (min-width:800px)'
 				},
 				{
-					into: function () {
+					into: function ( el ) {
+						if ( !+'\v1' ) {
+						} else {
+							console.info(el);
+						}
 						if ( $('body').hasClass('foo') ) {
 							return 'hop4';
 						}

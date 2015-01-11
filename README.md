@@ -28,13 +28,18 @@ Type: `Array`
 
 Contains objects which define conditions where and when should specific element be moved when media query is matched or unmatched.
 
-Arguments are:
+Arguments:
 
-* **into** (type: `String|Function|jQuery`) - To which element should content hop to.
-	* If defined as `String`, it is the value of `[data-hop-from]` attribute
-	* If defined as `Function`, it is the return value which can be `String` or `jQuery`
-	* If defined as `jQuery`, it is the jQuery element found inside document
-* **condition** (type: `String`) - Media query condition on which upon content should hop.
+| Name | Type | Description |
+| --- | --- | --- |
+| `into` | `String|Function|jQuery` | To which element should content hop to. |
+| `condition` | `String` | Media query condition on which upon content should hop. |
+
+Additionaly, `into` can be:
+
+* `String` - value of `[data-hop-from]` attribute
+* `Function` - return value which can be `String` or `jQuery` (has one argument - original element on which Dochopper is activated)
+* `jQuery` - jQuery element found inside document
 
 ###### hop
 
@@ -105,7 +110,7 @@ $('.hopper-a').dochopper({
 			media: 'screen and (min-width:1200px)'
 		},
 		{
-			into: function () {
+			into: function ( el ) {
 				if ( $('body').hasClass('foo') ) {
 					return 'hop3';
 				} else {
