@@ -1,3 +1,11 @@
+![Deprecated project](https://img.shields.io/badge/status-deprecated-red.svg)
+
+**This project is deprecated.**
+
+You can achieve most of the functionality with features like CSS Grid and grid areas.
+
+---
+
 # kist-dochopper
 
 Move elements on page depending on media query.
